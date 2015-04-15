@@ -1,7 +1,6 @@
 package glob
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -94,7 +93,6 @@ func globstar(pattern string) ([]string, error) {
 // makeRegexp compiles a regular expression that will match a filepath containing a globstar.
 // The resulting regex expects matches to have passed through filepath.ToSlash.
 func makeRegexp(p string) (*regexp.Regexp, error) {
-	fmt.Println(p)
 	p, err := filepath.Abs(p)
 	if err != nil {
 		return nil, err

@@ -3,7 +3,7 @@ package util
 import (
 	"io"
 
-	. "github.com/SaidinWoT/gulf/stream"
+	"github.com/SaidinWoT/gulf/stream"
 )
 
 // Mutate wraps f, returning a Transform that implements the main streaming functionality.
@@ -13,9 +13,9 @@ import (
 //
 // The error returned by f will be set to the Member being mutated.
 // Such errors generally stop any further transformation and should thus be returned only when necessary.
-func Mutate(f func(io.Reader) (io.Reader, error)) Transform {
+func Mutate(f func(io.Reader) (io.Reader, error)) stream.Transform {
 	return mutate(
-		func(m Member, r io.Reader) Member {
+		func(m stream.Member, r io.Reader) stream.Member {
 			m.Reader, m.Err = f(r)
 			return m
 		})
@@ -29,18 +29,18 @@ func Mutate(f func(io.Reader) (io.Reader, error)) Transform {
 //
 // Errors that cannot be recovered from should be set directly in the returned Member.
 // Note that this will generally stop any further transformation of that Member and should thus be a last resort.
-func MutateMembers(f func(Member) Member) Transform {
+func MutateMembers(f func(stream.Member) stream.Member) stream.Transform {
 	return mutate(
-		func(m Member, r io.Reader) Member {
+		func(m stream.Member, r io.Reader) stream.Member {
 			m.Reader = r
 			return f(m)
 		})
 }
 
-func mutate(f func(Member, io.Reader) Member) Transform {
-	return func(s Stream) Stream {
-		var t Stream
-		t.M = make([]Member, len(s.M))
+func mutate(f func(stream.Member, io.Reader) stream.Member) stream.Transform {
+	return func(s stream.Stream) stream.Stream {
+		var t stream.Stream
+		t.M = make([]stream.Member, len(s.M))
 		for i, m := range s.M {
 			if m.Err != nil {
 				t.M[i] = m

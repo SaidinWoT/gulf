@@ -4,12 +4,12 @@ import (
 	"errors"
 	"io"
 
-	"github.com/SaidinWoT/gulf/stream"
+	. "github.com/SaidinWoT/gulf/stream"
 )
 
 // IntentionallyClosed is an ErrIntentional error.
 // Its presence indicates that a Member's closure should not be considered an error.
-var IntentionallyClosed = stream.IntentionalErr(errors.New("Member was intentionally closed."))
+var IntentionallyClosed = IntentionalErr(errors.New("Member was intentionally closed."))
 
 type nilReader struct {
 	r io.Reader
@@ -40,14 +40,14 @@ func (r nilReader) Close() error {
 }
 
 // Close marks a Member as intentionally closed and replaces its Reader with a NilReader.
-func Close(m stream.Member) stream.Member {
+func Close(m Member) Member {
 	return CloseSaveError(m, IntentionallyClosed)
 }
 
 // CloseSaveError converts a Member to a NilReader while preserving the provided error e for future use.
 // Note that the error is not wrapped as an ErrIntentional.
-func CloseSaveError(m stream.Member, e error) stream.Member {
-	return stream.Member{
+func CloseSaveError(m Member, e error) Member {
+	return Member{
 		Name:   m.Name,
 		Reader: NilReader(m.Reader),
 		Err:    e,

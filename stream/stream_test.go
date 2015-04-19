@@ -63,7 +63,7 @@ func TestPipe(t *testing.T) {
 			t.Error(err)
 		}
 		if cmp != string(msg) {
-			t.Error("Transformation did not work. %s != %s", cmp, string(msg))
+			t.Errorf("Transformation did not work. %s != %s", cmp, string(msg))
 		}
 	}
 	m = SrcMap()

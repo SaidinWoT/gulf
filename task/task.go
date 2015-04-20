@@ -9,7 +9,6 @@ type Set struct {
 }
 
 // New returns a pointer to a Set.
-// It is initialized to use glob.Match and glob.Glob when Watching files.
 func New() *Set {
 	return &Set{
 		ts:  make(map[string]task),

@@ -18,9 +18,8 @@ func Ancestor(patterns ...string) string {
 		p := filepath.Dir(patterns[0])
 		if p == "." {
 			return ""
-		} else {
-			return p + string(filepath.Separator)
 		}
+		return p + string(filepath.Separator)
 	}
 	path := patterns[0]
 	rest := make([][]rune, len(patterns)-1)

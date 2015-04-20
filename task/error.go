@@ -67,7 +67,7 @@ func (e *ErrExec) Failed() bool {
 
 func (e *ErrExec) Error() string {
 	if e.Task != nil {
-		return err.Task.Error()
+		return e.Task.Error()
 	}
 	var failed []string
 	for name := range e.Req {

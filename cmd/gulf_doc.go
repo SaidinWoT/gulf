@@ -42,7 +42,7 @@ func Matcher(fn func(string, string) (bool, error)) Option {
 // WatchDelay returns an Option that sets the delay used to detect unique file events.
 //
 // Default: 10 * time.Millisecond
-func WatchDelay(d time.Duration) Option {
+func Delay(d time.Duration) Option {
 	return nopOption
 }
 
@@ -61,5 +61,5 @@ func (g *Gulf) Src(patterns ...string) stream.Stream {
 func (g *Gulf) Task(name string, fn func() error, deps ...string) {}
 
 // Watch adds a set of patterns to be watched with corresponding tasks.
-// There is no need to use StartWatch.
+// There is no need to use Start.
 func (g *Gulf) Watch(patterns []string, tasks ...string) {}

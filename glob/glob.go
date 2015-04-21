@@ -1,3 +1,5 @@
+// Package glob provides an extended globbing system.
+// It suplements path/filepath's globs with globstar, pattern negation, and dotfile filtering.
 package glob
 
 import (

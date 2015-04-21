@@ -1,3 +1,4 @@
+// Package watch implements filesystem event based execution of tasks atop gulf/task.
 package watch
 
 import (

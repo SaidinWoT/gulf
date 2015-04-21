@@ -1,3 +1,4 @@
+// Package stream implements a simple system to sequentially modify a set of named readers.
 package stream
 
 import "io"

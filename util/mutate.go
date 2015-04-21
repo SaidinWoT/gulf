@@ -1,3 +1,4 @@
+// Package util provides tools useful in authoring plugins for the gulf ecosystem.
 package util
 
 import (

@@ -1,3 +1,4 @@
+// Package task provides a task management system capable of resolving single-use, multi-use, and optional dependencies.
 package task
 
 import "strings"

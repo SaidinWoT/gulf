@@ -6,14 +6,13 @@ import "strings"
 // The Set type provides a structure to register a set of tasks and execute them.
 type Set struct {
 	ts  map[string]task
-	err *error
+	err error
 }
 
 // New returns a pointer to a Set.
 func New() *Set {
 	return &Set{
 		ts:  make(map[string]task),
-		err: new(error),
 	}
 }
 
@@ -66,19 +65,19 @@ func parseFlags(name string) (flags, string) {
 // Creating a dependency cycle registers an error in the Set, which will prevent further use of the Set.
 // Any such error will also be returned.
 func (s *Set) Task(name string, fn func() error, deps ...string) error {
-	if *s.err != nil {
-		return *s.err
+	if s.err != nil {
+		return s.err
 	}
 	f, name := parseFlags(name)
 	if name == "" {
-		*s.err = ErrNoName
+		s.err = ErrNoName
 	} else if _, exists := s.ts[name]; exists {
-		*s.err = ErrSameName{name: name}
+		s.err = ErrSameName{name: name}
 	} else if cycle, err := s.cycle(name, deps...); cycle {
-		*s.err = err
+		s.err = err
 	}
-	if *s.err != nil {
-		return *s.err
+	if s.err != nil {
+		return s.err
 	}
 	s.ts[name] = task{
 		name: name,

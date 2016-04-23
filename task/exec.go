@@ -4,10 +4,10 @@ import "sync"
 
 // Exec runs the task with the provided name after resolving all of its dependencies.
 // As long as the task exists, any error returned will be an ErrExec,
-// which may be introspected for the errors returned by the dependencies..
+// which may be introspected for the errors returned by the dependencies.
 func (s *Set) Exec(name string) error {
-	if *s.err != nil {
-		return *s.err
+	if s.err != nil {
+		return s.err
 	}
 	e := &exec{
 		fs: make(map[string]func() error),

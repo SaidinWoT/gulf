@@ -130,7 +130,6 @@ func regexify(p string) string {
 			i++
 			j++
 		}
-		keepchar := true
 		switch p[i] {
 		case '\\':
 			s[j] = p[i]
@@ -166,7 +165,7 @@ func regexify(p string) string {
 				}
 				j += 15
 			}
-			keepchar = false
+			goto Separator
 		case '?':
 			goto Suffix
 		case '[':
@@ -175,10 +174,8 @@ func regexify(p string) string {
 			s[j] = '\\'
 			j++
 		}
-		if keepchar {
-			s[j] = p[i]
-			j++
-		}
+    s[j] = p[i]
+    j++
 	Separator:
 		onseparator = p[i] == '/'
 		continue

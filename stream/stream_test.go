@@ -1,64 +1,67 @@
-package stream_test
+package stream
 
 import (
 	"bytes"
-	"errors"
 	"io"
 	"io/ioutil"
 	"testing"
-
-	. "github.com/SaidinWoT/gulf/stream"
 )
 
-const b = "Text"
+const b string = "text"
 
 var names = []string{"Test", "Pizza"}
 
-func SrcMap() map[string]io.Reader {
-	m := make(map[string]io.Reader)
-	for _, name := range names {
-		m[name] = bytes.NewBufferString(name)
+func testSrcs() []ReadNamer {
+	rns := make([]ReadNamer, len(names))
+	for i, name := range names {
+		rns[i] = NamedReader{
+			Reader:     bytes.NewBufferString(name),
+			NameString: name,
+		}
 	}
-	return m
+	return rns
 }
 
 func Prepend(b string) Transform {
 	return func(s Stream) Stream {
-		var t Stream
-		for _, m := range s.M {
-			m.Reader = io.MultiReader(bytes.NewBufferString(b), m.Reader)
-			t.M = append(t.M, m)
-		}
+		t := make(chan ReadNamer, len(s))
+		go func() {
+			for rn := range s {
+				t <- NamedReader{
+					Reader:     io.MultiReader(bytes.NewBufferString(b), rn),
+					NameString: rn.Name(),
+				}
+			}
+			close(t)
+		}()
 		return t
 	}
 }
 
 func TestSrc(t *testing.T) {
-	m := SrcMap()
-	s := Src(m)
-	if len(s.M) != 2 {
-		t.Error("Improper number of Members created.")
-	}
-	for _, m := range s.M {
-		if m.Name != names[0] && m.Name != names[1] {
+	rns := testSrcs()
+	s := Src(rns...)
+
+	for rn := range s {
+		if !in(names, rn.Name()) {
 			t.Error("Member not given correct name.")
 		}
-		msg, err := ioutil.ReadAll(m.Reader)
+		msg, err := ioutil.ReadAll(rn)
 		if err != nil {
 			t.Error(err)
 		}
-		if m.Name != string(msg) {
+		if rn.Name() != string(msg) {
 			t.Error("Reader not properly instantiated.")
 		}
 	}
 }
 
 func TestPipe(t *testing.T) {
-	m := SrcMap()
-	s := Src(m).Pipe(Prepend(b))
-	for _, m := range s.M {
-		cmp := b + m.Name
-		msg, err := ioutil.ReadAll(m.Reader)
+	rns := testSrcs()
+	s := Src(rns...).Pipe(Prepend(b))
+	for rn := range s {
+		cmp := b + rn.Name()
+		msg, err := ioutil.ReadAll(rn)
 		if err != nil {
 			t.Error(err)
 		}
@@ -66,34 +69,17 @@ func TestPipe(t *testing.T) {
 			t.Errorf("Transformation did not work. %s != %s", cmp, string(msg))
 		}
 	}
-	m = SrcMap()
-	s = Src(m)
-	s.Err = errors.New("")
-	s = s.Pipe(Prepend(b))
-	for _, m := range s.M {
-		msg, err := ioutil.ReadAll(m.Reader)
-		if err != nil {
-			t.Error(err)
-		}
-		str := string(msg)
-		cmp := b + m.Name
-		if cmp == str {
-			t.Error("Transformation not aborted by Stream error.")
-		}
-		if m.Name != str {
-			t.Errorf("Reader not preserved during Stream error. %s != %s", b, str)
-		}
-	}
 }
 
 func TestDest(t *testing.T) {
 	ws := make(map[string]io.Writer, len(names))
-	for _, n := range names {
-		ws[n] = new(bytes.Buffer)
+	for _, name := range names {
+		ws[name] = new(bytes.Buffer)
 	}
-	m := SrcMap()
-	err := Src(m).Dest(func(name string) io.Writer {
-		return ws[name]
+
+	rns := testSrcs()
+	err := Src(rns...).Dest(func(name string) (io.Writer, error) {
+		return ws[name], nil
 	})
 	if err != nil {
 		t.Error(err)
@@ -108,4 +94,13 @@ func TestDest(t *testing.T) {
 			t.Errorf("Reader not appropriately written to Writer. %s != %s", n, string(msg))
 		}
 	}
+}
+
+func in(ss []string, p string) bool {
+	for _, s := range ss {
+		if s == p {
+			return true
+		}
+	}
+	return false
 }

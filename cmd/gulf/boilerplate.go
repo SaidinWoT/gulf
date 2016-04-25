@@ -72,7 +72,7 @@ func Delay(d time.Duration) Option {
 func (g *Gulf) Src(patterns ...string) stream.Stream {
 	filenames := glob.Parse(g.glob, patterns...)
 	m := util.SrcFiles(filenames...)
-	return stream.Src(m)
+	return stream.Src(m...)
 }
 
 var At = util.At
